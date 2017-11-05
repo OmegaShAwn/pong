@@ -4,8 +4,8 @@
 #include<sstream>
 using namespace sf;
 
-int ww, wh, m1, m2, status;
-Text s1, s2, start, ex;
+int ww, wh, m1, m2, status, cpu;
+Text s1, s2, start, op, ex, playerwins;
 float rad, len, x, y, sx, sy; 
 ContextSettings settings;
 RenderWindow window;
@@ -126,12 +126,19 @@ int main(){
 	start.setCharacterSize(50);
 	start.setFont(font);
 	start.setPosition(ww/2, wh/2-75);
-	start.setString("Start Game");
+	start.setString("Vs CPU");
+	op.setString("Vs Player");
+	op.setCharacterSize(50);
+	op.setFont(font);
+	op.setPosition(ww/2, wh/2-175);
 	ex.setString("Exit");
 	ex.setCharacterSize(50);
 	ex.setFont(font);
 	ex.setPosition(ww/2, wh/2+25);
-	int E;
+	playerwins.setFont(font);
+	playerwins.setCharacterSize(50);
+	int E, U, D;
+	cpu = 0;
 	CircleShape mball(150);
 	mball.setFillColor(Color::Green);
 	mball.setOutlineThickness(30);
@@ -141,31 +148,56 @@ int main(){
 	while(window.isOpen()){
 		Event event;
 		E = 0;
+		U = 0;
+		D = 0;
 		while(window.pollEvent(event)){
 			if(event.type == Event::Closed)
 				window.close();
 			if(event.type == Event::KeyPressed)
 				if(event.key.code == Keyboard::Return)
 					E = 1;
+			if(event.type == Event::KeyPressed)
+				if(event.key.code == Keyboard::Up)
+					U = 1;
+			if(event.type == Event::KeyPressed)
+				if(event.key.code == Keyboard::Down)
+					D = 1;
 		}
 		if(status == 0){
 			window.clear(Color::White);
 			window.draw(mball);
-			if(Keyboard::isKeyPressed(Keyboard::Down))
-				o = 1;
-			if(Keyboard::isKeyPressed(Keyboard::Up))
-				o = 0;
+			if(D == 1)
+				if(o <=2)
+					o++;
+			if(U == 1)
+				if(o >= 0)
+					o--;
 			if(o == 0){
-				start.setColor(Color(0, 0, 0, 255));
+				start.setColor(Color(0, 0, 0, 100));
+				op.setColor(Color(0, 0, 0, 255));
 				ex.setColor(Color(0, 0, 0, 100));
 				if(E == 1){
 					status = 1;
+					cpu = 0;
 					start.setString("Resume");
 					ex.setString("Main Menu");
 				}
 			}
 			if(o == 1){
+				start.setColor(Color(0, 0, 0, 255));
+				op.setColor(Color(0, 0, 0, 100));
+				ex.setColor(Color(0, 0, 0, 100));
+				if(E == 1){
+					status = 1;
+					cpu = 1;
+					start.setString("Resume");
+					ex.setString("Main Menu");
+				}
+				
+			}
+			if(o == 2){
 				start.setColor(Color(0, 0, 0, 100));
+				op.setColor(Color(0, 0, 0, 100));
 				ex.setColor(Color(0, 0, 0, 255));
 				if(E == 1){
 					o = 0;
@@ -173,6 +205,7 @@ int main(){
 				}
 			}
 			window.draw(start);
+			window.draw(op);
 			window.draw(ex);
 			window.display();
 		}
@@ -181,10 +214,15 @@ int main(){
 				player1.mov(-1);
 			if(Keyboard::isKeyPressed(Keyboard::Right))
 				player1.mov(1);
-			if(Keyboard::isKeyPressed(Keyboard::A))				//Keys a and d for player 2;
-				player2.mov(-1);
-			if(Keyboard::isKeyPressed(Keyboard::D))
-				player2.mov(1);
+			if(cpu == 0){
+				if(Keyboard::isKeyPressed(Keyboard::A))			//Keys a and d for player 2;
+					player2.mov(-1);
+				if(Keyboard::isKeyPressed(Keyboard::D))
+					player2.mov(1);
+			}
+			else{
+				//AI
+			}
 			if(Keyboard::isKeyPressed(Keyboard::Escape))
 				status = 2;
 			if(y <= 0 || y >= wh-12){					//if ball reaches the top or bottom;
@@ -192,15 +230,41 @@ int main(){
 					m2++;
 				else
 					m1++;
-				if(m1 == 15){
+				if(m1 == 1){
 					m1 = 0;
 					m2 = 0;
-					//
+					window.clear(Color::White);
+					if(cpu == 0)
+						playerwins.setString("Player 1 Wins");
+					else
+						playerwins.setString("Player Wins");
+					playerwins.setPosition(ww/2-playerwins.getLocalBounds().width/2, wh/2-playerwins.getLocalBounds().height/2);
+					playerwins.setColor(Color::Red);
+					window.draw(playerwins);
+					window.display();
+					sleep(seconds(2));
+					status = 0;
+					start.setString("Vs CPU");
+					op.setString("Vs Player");
+					ex.setString("Exit");
 				}
-				if(m2 == 15){
+				if(m2 == 1){
 					m1 = 0;
 					m2 = 0;
-					//
+					window.clear(Color::White);
+					playerwins.setColor(Color::Blue);
+					if(cpu == 0)
+						playerwins.setString("Player 2 Wins");
+					else
+						playerwins.setString("CPU Wins");
+					playerwins.setPosition(ww/2-playerwins.getLocalBounds().width/2, wh/2-playerwins.getLocalBounds().height/2);
+					window.draw(playerwins);
+					window.display();
+					sleep(seconds(2));
+					status = 0;
+					start.setString("Vs CPU");
+					op.setString("Vs Player");
+					ex.setString("Exit");
 				}
 				reset();
 			}
@@ -244,7 +308,8 @@ int main(){
 					reset();		
 					m1 = 0;
 					m2 = 0;
-					start.setString("Start Game");
+					start.setString("Vs CPU");
+					op.setString("Vs Player");
 					ex.setString("Exit");
 				}
 			}
