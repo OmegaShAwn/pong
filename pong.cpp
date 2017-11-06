@@ -282,9 +282,9 @@ int main(){
 			}
 			else{
 				if(level == 1){
-					if(y < 580 && x + r - player2.x - rad - len/2 < 0)
+					if(y < 580 && x + r - player2.x - rad - len/4 < 0)
 						player2.mov(-1);
-					else if(y < 580 && x + r - player2.x - rad - len/2 > 0)
+					else if(y < 580 && x + r - player2.x - rad - 3*len/4 > 0)
 						player2.mov(1);
 				}
 				if(level == 2){
@@ -296,6 +296,8 @@ int main(){
 						player2.mov(-1);
 					else if(y < 580 && x + r - player2.x - rad - len > 0)
 						player2.mov(1);
+					else
+						player2.mov(rand()%2-1);
 				}
 				if(level == 3){
 					if(sy > 0){
@@ -314,6 +316,8 @@ int main(){
 						player2.mov(-1);
 					else if(y < 580 && d - player2.x - rad - len > 0)
 						player2.mov(1);
+					else
+						player2.mov(rand()%2-1);
 				}
 			}
 			if(ESC == 1){
