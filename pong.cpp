@@ -6,6 +6,8 @@ using namespace sf;
 
 int ww, wh, m1, m2, status, cpu, r, level;
 Text s1, s2, start, op, ex, playerwins;
+Texture star;
+Sprite diff1, diff2, diff3;
 float rad, len, x, y, sx, sy, d; 
 ContextSettings settings;
 RenderWindow window;
@@ -91,6 +93,7 @@ void setwin(){
 
 int main(){
 	int o = 0;
+	window.setVerticalSyncEnabled(true);
 	r = 4;
 	status = 0;
 	ww = 900;
@@ -136,20 +139,30 @@ int main(){
 	ex.setPosition(ww/2, wh/2+25);
 	playerwins.setFont(font);
 	playerwins.setCharacterSize(50);
-	int E, U, D, ESC;
+	int E, U, D, L, R, ESC;
 	cpu = 0;
 	CircleShape mball(150);
 	mball.setFillColor(Color::Green);
 	mball.setOutlineThickness(30);
 	mball.setOutlineColor(Color::Black);
 	mball.setPosition(wh/4-100, wh/2-150);
-	level = 2;
+	level = 1;
+	star.loadFromFile("star1.png");
+	star.setSmooth(true);
+	diff1.setTexture(star);
+	diff1.setScale(0.15, 0.15);
+	diff2.setTexture(star);
+	diff2.setScale(0.15, 0.15);
+	diff3.setTexture(star);
+	diff3.setScale(0.15, 0.15);
 	
 	while(window.isOpen()){
 		Event event;
 		E = 0;
 		U = 0;
 		D = 0;
+		L = 0;
+		R = 0;
 		while(window.pollEvent(event)){
 			if(event.type == Event::Closed)
 				window.close();
@@ -163,14 +176,11 @@ int main(){
 				if(event.key.code == Keyboard::Down)
 					D = 1;
 			if(event.type == Event::KeyPressed)
-				if(event.key.code == Keyboard::Num1)
-					level = 1;
+				if(event.key.code == Keyboard::Left)
+					L = 1;
 			if(event.type == Event::KeyPressed)
-				if(event.key.code == Keyboard::Num2)
-					level = 2;
-			if(event.type == Event::KeyPressed)
-				if(event.key.code == Keyboard::Num3)
-					level = 3;
+				if(event.key.code == Keyboard::Right)
+					R = 1;
 			if(event.type == Event::KeyPressed)
 				if(event.key.code == Keyboard::Escape)
 					ESC = 1;
@@ -199,6 +209,27 @@ int main(){
 				start.setColor(Color(0, 0, 0, 255));
 				op.setColor(Color(0, 0, 0, 100));
 				ex.setColor(Color(0, 0, 0, 100));
+				diff1.setColor(Color(0, 0, 0, 255));
+				diff1.setPosition(ww/2 + 170, wh/2 - 90);
+				if(level < 3)
+					if(R == 1)
+						level++;
+				if(level > 1)
+					if(L == 1)
+						level--;
+				if(level < 2)
+					diff2.setColor(Color(0, 0, 0, 100));
+				else
+					diff2.setColor(Color(0, 0, 0, 255));
+				diff2.setPosition(ww/2 + 250, wh/2 - 90);
+				if(level < 3)
+					diff3.setColor(Color(0, 0, 0, 100));
+				else
+					diff3.setColor(Color(0, 0, 0, 255));
+				diff3.setPosition(ww/2 + 330, wh/2 - 90);
+				window.draw(diff1);
+				window.draw(diff2);
+				window.draw(diff3);
 				if(E == 1){
 					status = 1;
 					cpu = 1;
