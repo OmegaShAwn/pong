@@ -286,6 +286,8 @@ int main(){
 						player2.mov(-1);
 					else if(y < 580 && x + r - player2.x - rad - 3*len/4 > 0)
 						player2.mov(1);
+					else
+						player2.mov(rand()%2-1);
 				}
 				if(level == 2){
 					if(sy < 0 && ww/2 - player2.x - rad - len/2 < 0)
@@ -366,8 +368,6 @@ int main(){
 					ex.setString("Exit");
 				}
 				reset();
-				setwin();
-				sleep(seconds(.5));
 			}
 			if(sy >= 20){							//if ball crosses the maximum speed;
 				reset();
