@@ -1,4 +1,5 @@
 #include<SFML/Graphics.hpp>
+#include<SFML/Audio.hpp>
 #include<iostream>
 #include<cmath>
 #include<sstream>
@@ -8,6 +9,9 @@ int ww, wh, m1, m2, status, cpu, r, level;
 Text s1, s2, start, op, ex, playerwins;
 Texture star;
 Sprite diff1, diff2, diff3;
+SoundBuffer sb;
+Sound sound;
+Music music;
 float rad, len, x, y, sx, sy, d; 
 ContextSettings settings;
 RenderWindow window;
@@ -60,19 +64,6 @@ class paddle{
 };
 paddle player1, player2;
 
-void reset(){									//resets to initial position
-
-	x = ww/2-r;
-	y = wh/2-r;
-	ball.setPosition(x, y);
-	player1 = paddle(ww/2-(len+2*rad)/2, 20);
-	player2 = paddle(ww/2-(len+2*rad)/2, wh-2*rad-20);
-	player1.setcol(255, 0, 0);
-	player2.setcol(0, 0, 255);
-	sx = 0;
-	sy = .5;
-}
-
 void setwin(){
 	
 	window.clear(Color::White);
@@ -89,6 +80,22 @@ void setwin(){
 	s2.setString(sp2.str());
 	window.draw(s2);
 	window.display();
+}
+
+void reset(){									//resets to initial position
+
+	x = ww/2-r;
+	y = wh/2-r;
+	ball.setPosition(x, y);
+	player1 = paddle(ww/2-(len+2*rad)/2, 20);
+	player2 = paddle(ww/2-(len+2*rad)/2, wh-2*rad-20);
+	player1.setcol(255, 0, 0);
+	player2.setcol(0, 0, 255);
+	sx = 0;
+	if(sy < 0)
+		sy = -0.5;
+	else
+		sy = 0.5;
 }
 
 int main(){
@@ -108,6 +115,11 @@ int main(){
 	m2 = 0;
 	Font font;
 	font.loadFromFile("28 Days Later.ttf");
+	music.openFromFile("calm.wav");
+	music.setLoop(true);
+	sb.loadFromFile("ball.wav");
+	sound.setBuffer(sb);
+	sound.setVolume(30);
 	s1.setFont(font);
 	s1.setCharacterSize(50);
 	s1.setColor(Color::Red);
@@ -155,6 +167,7 @@ int main(){
 	diff2.setScale(0.15, 0.15);
 	diff3.setTexture(star);
 	diff3.setScale(0.15, 0.15);
+	music.play();
 	
 	while(window.isOpen()){
 		Event event;
@@ -212,11 +225,15 @@ int main(){
 				diff1.setColor(Color(0, 0, 0, 255));
 				diff1.setPosition(ww/2 + 170, wh/2 - 90);
 				if(level < 3)
-					if(R == 1)
+					if(R == 1){
 						level++;
+						sound.play();
+					}
 				if(level > 1)
-					if(L == 1)
+					if(L == 1){
 						level--;
+						sound.play();
+					}
 				if(level < 2)
 					diff2.setColor(Color(0, 0, 0, 100));
 				else
@@ -345,17 +362,24 @@ int main(){
 					ex.setString("Exit");
 				}
 				reset();
+				setwin();
+				sleep(seconds(.5));
 			}
-			if(sy >= 20)							//if ball crosses the maximum speed;
+			if(sy >= 20){							//if ball crosses the maximum speed;
 				reset();
+				setwin();
+				sleep(seconds(.5));
+			}
 			if(y >= player1.y && y <= player1.y + rad*2 && x + r >= player1.x && x + r <= player1.x+2*rad+len){		//collision p1;
 				y = player1.y + rad * 2;
 				sy = -sy;
+				sound.play();
 				sx = ((x + r) - (player1.x + rad + len/2)) * 0.035;
 			}
 			if(y + 2*r >= player2.y && y + 2*r <= player2.y + rad*2 && x + r >= player2.x && x + r <= player2.x+2*rad+len){	//collision p2
 				y = player2.y - 2*r;
 				sy = -sy;
+				sound.play();
 				sx = ((x + r) - (player2.x + rad + len/2)) * 0.035;
 			}
 			if(x < 0 || x + 2*r > ww)					//reflection of ball from wall;
