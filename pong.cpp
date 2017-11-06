@@ -349,7 +349,7 @@ int main(){
 					op.setString("Vs Player");
 					ex.setString("Exit");
 				}
-				if(m2 == 15){
+				else if(m2 == 15){
 					m1 = 0;
 					m2 = 0;
 					window.clear(Color::White);
@@ -367,7 +367,11 @@ int main(){
 					op.setString("Vs Player");
 					ex.setString("Exit");
 				}
-				reset();
+				else{
+					reset();
+					setwin();
+					sleep(seconds(.5));
+				}
 			}
 			if(sy >= 20){							//if ball crosses the maximum speed;
 				reset();
