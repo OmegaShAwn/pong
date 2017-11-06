@@ -4,9 +4,9 @@
 #include<sstream>
 using namespace sf;
 
-int ww, wh, m1, m2, status, cpu;
+int ww, wh, m1, m2, status, cpu, r, level;
 Text s1, s2, start, op, ex, playerwins;
-float rad, len, x, y, sx, sy; 
+float rad, len, x, y, sx, sy, d; 
 ContextSettings settings;
 RenderWindow window;
 CircleShape ball;
@@ -60,10 +60,10 @@ paddle player1, player2;
 
 void reset(){									//resets to initial position
 
-	x = ww/2-6;
-	y = wh/2-6;
+	x = ww/2-r;
+	y = wh/2-r;
 	ball.setPosition(x, y);
-	player1 = paddle(ww/2-(len+2*rad)/2, 20.0f);
+	player1 = paddle(ww/2-(len+2*rad)/2, 20);
 	player2 = paddle(ww/2-(len+2*rad)/2, wh-2*rad-20);
 	player1.setcol(255, 0, 0);
 	player2.setcol(0, 0, 255);
@@ -81,8 +81,8 @@ void setwin(){
 	sp1 << m1;
 	s1.setString(sp1.str());
 	window.draw(s1);
-	if(m2 > 9)
-		s2.setPosition(ww-50, wh/2 - 25);
+	s1.setPosition(20,wh/2 - s1.getLocalBounds().height/2);
+	s2.setPosition(ww- s2.getLocalBounds().width - 20, wh/2 - s2.getLocalBounds().height/2);
 	sp2<< m2;
 	s2.setString(sp2.str());
 	window.draw(s2);
@@ -91,13 +91,14 @@ void setwin(){
 
 int main(){
 	int o = 0;
+	r = 4;
 	status = 0;
 	ww = 900;
 	wh = 600;
 	rad = 10;
 	len = 50;
-	x = ww/2-6;
-	y = wh/2-6;
+	x = ww/2-r;
+	y = wh/2-r;
 	sx = 0;
 	sy = .5;
 	m1 = 0;
@@ -107,18 +108,16 @@ int main(){
 	s1.setFont(font);
 	s1.setCharacterSize(50);
 	s1.setColor(Color::Red);
-	s1.setPosition(10,wh/2 - 25);
 	s2.setFont(font);
 	s2.setCharacterSize(50);
 	s2.setColor(Color::Blue);
-	s2.setPosition(ww-30, wh/2 - 25);
 	settings.antialiasingLevel = 8;
 	window.create(VideoMode(ww, wh), "Pong", Style::Default, settings);
 	player1 = paddle(ww/2-(len+2*rad)/2, 20.0f);
 	player2 = paddle(ww/2-(len+2*rad)/2, wh-2*rad-20);
 	player1.setcol(255, 0, 0);
 	player2.setcol(0, 0, 255);
-	ball.setRadius(4);
+	ball.setRadius(r);
 	ball.setFillColor(Color(0, 255, 0));
 	ball.setOutlineColor(Color::Black);
 	ball.setOutlineThickness(3);
@@ -137,13 +136,14 @@ int main(){
 	ex.setPosition(ww/2, wh/2+25);
 	playerwins.setFont(font);
 	playerwins.setCharacterSize(50);
-	int E, U, D;
+	int E, U, D, ESC;
 	cpu = 0;
 	CircleShape mball(150);
 	mball.setFillColor(Color::Green);
 	mball.setOutlineThickness(30);
 	mball.setOutlineColor(Color::Black);
 	mball.setPosition(wh/4-100, wh/2-150);
+	level = 2;
 	
 	while(window.isOpen()){
 		Event event;
@@ -162,15 +162,27 @@ int main(){
 			if(event.type == Event::KeyPressed)
 				if(event.key.code == Keyboard::Down)
 					D = 1;
+			if(event.type == Event::KeyPressed)
+				if(event.key.code == Keyboard::Num1)
+					level = 1;
+			if(event.type == Event::KeyPressed)
+				if(event.key.code == Keyboard::Num2)
+					level = 2;
+			if(event.type == Event::KeyPressed)
+				if(event.key.code == Keyboard::Num3)
+					level = 3;
+			if(event.type == Event::KeyPressed)
+				if(event.key.code == Keyboard::Escape)
+					ESC = 1;
 		}
 		if(status == 0){
 			window.clear(Color::White);
 			window.draw(mball);
 			if(D == 1)
-				if(o <=2)
+				if(o < 2)
 					o++;
 			if(U == 1)
-				if(o >= 0)
+				if(o > 0)
 					o--;
 			if(o == 0){
 				start.setColor(Color(0, 0, 0, 100));
@@ -190,6 +202,7 @@ int main(){
 				if(E == 1){
 					status = 1;
 					cpu = 1;
+					o = 0;
 					start.setString("Resume");
 					ex.setString("Main Menu");
 				}
@@ -200,7 +213,6 @@ int main(){
 				op.setColor(Color(0, 0, 0, 100));
 				ex.setColor(Color(0, 0, 0, 255));
 				if(E == 1){
-					o = 0;
 					window.close();
 				}
 			}
@@ -221,16 +233,51 @@ int main(){
 					player2.mov(1);
 			}
 			else{
-				//AI
+				if(level == 1){
+					if(y < 580 && x + r - player2.x - rad - len/2 < 0)
+						player2.mov(-1);
+					else if(y < 580 && x + r - player2.x - rad - len/2 > 0)
+						player2.mov(1);
+				}
+				if(level == 2){
+					if(sy < 0 && ww/2 - player2.x - rad - len/2 < 0)
+						player2.mov(-1);
+					else if(sy < 0 && ww/2 - player2.x - rad - len/2 > 0)
+						player2.mov(1);
+					else if(y < 580 && x + r - player2.x - rad < 0)
+						player2.mov(-1);
+					else if(y < 580 && x + r - player2.x - rad - len > 0)
+						player2.mov(1);
+				}
+				if(level == 3){
+					if(sy > 0){
+						d = (((player2.y - y)/sy) * sx) + x;
+						while(d < 0 || d > ww-2*r){
+							d = -d;
+							if(d > ww-2*r)
+								d = d - ww+2*r;
+						}
+					}
+					if(sy < 0 && ww/2 - player2.x - rad - len/2 < 0)
+						player2.mov(-1);
+					else if(sy < 0 && ww/2 - player2.x - rad - len/2 > 0)
+						player2.mov(1);
+					else if(y < 580 && d - player2.x - rad < 0)
+						player2.mov(-1);
+					else if(y < 580 && d - player2.x - rad - len > 0)
+						player2.mov(1);
+				}
 			}
-			if(Keyboard::isKeyPressed(Keyboard::Escape))
+			if(ESC == 1){
+				ESC = 0;
 				status = 2;
-			if(y <= 0 || y >= wh-12){					//if ball reaches the top or bottom;
+			}
+			if(y <= 0 || y >= wh-2*r){					//if ball reaches the top or bottom;
 				if(y <=0)
 					m2++;
 				else
 					m1++;
-				if(m1 == 1){
+				if(m1 == 15){
 					m1 = 0;
 					m2 = 0;
 					window.clear(Color::White);
@@ -248,7 +295,7 @@ int main(){
 					op.setString("Vs Player");
 					ex.setString("Exit");
 				}
-				if(m2 == 1){
+				if(m2 == 15){
 					m1 = 0;
 					m2 = 0;
 					window.clear(Color::White);
@@ -270,23 +317,27 @@ int main(){
 			}
 			if(sy >= 20)							//if ball crosses the maximum speed;
 				reset();
-			if(y >= player1.y && y <= player1.y + rad*2 && x + 6 >= player1.x && x + 6 <= player1.x+2*rad+len){		//collision p1;
+			if(y >= player1.y && y <= player1.y + rad*2 && x + r >= player1.x && x + r <= player1.x+2*rad+len){		//collision p1;
 				y = player1.y + rad * 2;
 				sy = -sy;
-				sx = ((x + 6) - (player1.x + rad + len/2)) * 0.02;
+				sx = ((x + r) - (player1.x + rad + len/2)) * 0.035;
 			}
-			if(y + 12 >= player2.y && y + 12 <= player2.y + rad*2 && x + 6 >= player2.x && x + 6 <= player2.x+2*rad+len){	//collision p2
-				y = player2.y - 12;
+			if(y + 2*r >= player2.y && y + 2*r <= player2.y + rad*2 && x + r >= player2.x && x + r <= player2.x+2*rad+len){	//collision p2
+				y = player2.y - 2*r;
 				sy = -sy;
-				sx = ((x + 6) - (player2.x + rad + len/2)) * 0.01;
+				sx = ((x + r) - (player2.x + rad + len/2)) * 0.035;
 			}
-			if(x < 0 || x + 12 > ww)					//reflection of ball from wall;
+			if(x < 0 || x + 2*r > ww)					//reflection of ball from wall;
 				sx = -sx;
-			sy *= 1.00001;
+			sy *= 1.00003;
 			ball.setPosition(x+=sx, y+=sy);
 			setwin();							//clear draw and display;
 		}
 		if(status == 2){
+			if(ESC == 1){
+				ESC = 0;
+				status = 1;
+			}
 			window.clear(Color::White);
 			window.draw(mball);
 			if(Keyboard::isKeyPressed(Keyboard::Down))
